@@ -1,14 +1,13 @@
 #goal definition
 float32 x_cordinate
 float32 y_cordinate
+float32 x_center
+float32 y_center
 
 ---
 #result definition
-float32 sequence
-int32 rank
+string name
 ---
 #feedback
-float32 x_cordinate
-float32 y_cordinate
-
+string[] flag
 
