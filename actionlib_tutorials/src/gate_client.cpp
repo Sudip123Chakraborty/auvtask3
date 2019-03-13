@@ -6,7 +6,12 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/core/core.hpp"
 #include<iostream>
-
+#include "opencv2/videoio/videoio.hpp"
+//#include "opencv2/video.hpp"
+//#include "opencv2/imgproc/imgproc.hpp"
+//#include "opencv2/video/video.hpp"
+  
+	
 using namespace cv;
 using namespace std;
 Mat img,frame,src;
@@ -16,10 +21,19 @@ int main(int argc ,char  **argv)
   ros::init(argc, argv, "test_gate");
 
   
+   actionlib::SimpleActionClient<actionlib_tutorials::GateAction> ac("gate", true);
+
+	  ROS_INFO("Waiting for action server to start.");
+	  
+	  ac.waitForServer(); 
+
+	  ROS_INFO("Action server started, sending goal.");
+	  
+	  
   
 /**********************************************************************************************************/
   int i,j;
-  VideoCapture Video("auv.avi");// capturing the video
+  VideoCapture Video("/home/sudip/Desktop/winterworkshop/auv.avi");// capturing the video
   //Mat frame;
   Mat RGB,bw,hsv;
   while(1)
@@ -72,59 +86,7 @@ int main(int argc ,char  **argv)
        Mat dst1, cdst;
        Canny(binary, dst1, 10, 255, 3);
        cvtColor(dst1, cdst, CV_GRAY2BGR);
-      contour(binary);
-       
-        vector<Vec4i> lines;
-        HoughLinesP(dst1, lines, 1, CV_PI/180, 50, 50, 10);
-        for( size_t i = 0; i < lines.size(); i++ )
-        {
-          Vec4i l = lines[i];
-          line( src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
-        }
-
-
-
-
-
-       /*imshow("source", src);
-
-      imshow("RGB image", RGB);
-      imshow("HSV Image", hsv);
-
-       imshow("Binary Image",binary);*/
-
-       
-
-
-
-      //Canny(frame,img,100,240,5);
-
-      waitKey(1);
-
-      }
-
-
-
-
-
-/*****************************************************************************************************************/
-  
-  
-
-  
-  
-  return 0;
-}
-
-
-/*******************************************************************************************************************/
-
-void contour(Mat gray)
- {
-	     //namedWindow( "Validation Gate", 0 );
-
-
-	 actionlib::SimpleActionClient<actionlib_tutorials::GateAction> ac("gate", true);
+   
 
 	  ROS_INFO("Waiting for action server to start.");
 	  
@@ -176,6 +138,8 @@ void contour(Mat gray)
 
 		goal.x_cordinate=mc[i].x;
 		goal.y_cordinate=mc[i].y;
+		goal.x_center=src.rows;
+		goal.y_center=src.cols;
 		ac.sendGoal(goal);
 		
 
@@ -188,7 +152,29 @@ void contour(Mat gray)
 
       }
 
-	bool finished_before_timeout = ac.waitForResult(ros::Duration(0));
+	
+    }
+
+
+        vector<Vec4i> lines;
+        HoughLinesP(dst1, lines, 1, CV_PI/180, 50, 50, 10);
+        for( size_t i = 0; i < lines.size(); i++ )
+        {
+          Vec4i l = lines[i];
+          line( src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
+       }
+
+      waitKey(1);
+
+      }
+
+
+
+
+
+/*****************************************************************************************************************/
+ 
+bool finished_before_timeout = ac.waitForResult(ros::Duration(500));
 
   if (finished_before_timeout)
   {
@@ -199,15 +185,15 @@ void contour(Mat gray)
     ROS_INFO("Action did not finish before the time out.");
 
   
-    }
-
-
-
-   //imshow( "Validation Gate", src );
   
+	  
+	  actionlib_tutorials::GateGoal goal;
+  
+  return 0;
 }
-       
 
+
+/*******************************************************************************************************************/
 
 
 
