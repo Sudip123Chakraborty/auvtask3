@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 2.8.3)
 project(actionlib_tutorials)
 
@@ -9,12 +10,16 @@ project(actionlib_tutorials)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   actionlib
-  #actionlib_msg
+  actionlib_msgs
   message_generation
   roscpp
   rospy
   std_msgs
 )
+
+find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(OpenCV REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -64,23 +69,14 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
-
-add_action_files(
-  DIRECTORY action
-  FILES Gate.action
-)
+ add_action_files(
+   DIRECTORY action
+   FILES Gate.action
+ )
 
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
-   DEPENDENCIES
-   actionlib_msgs
-   std_msgs
-	
+   DEPENDENCIES  actionlib_msgs  std_msgs
  )
 
 ################################################
@@ -113,9 +109,8 @@ add_action_files(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES actionlib_tutorials
-  CATKIN_DEPENDS actionlib actionlib_msg message_generation roscpp rospy std_msgs
+
+  CATKIN_DEPENDS actionlib_msgs # actionlib message_generation roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -126,14 +121,47 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
- include
+# include
   ${catkin_INCLUDE_DIRS}
-  #${Boost_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
+
+add_executable(gate_server src/gate_server.cpp)
+
+target_link_libraries(
+  gate_server
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  gate_server
+  ${actionlib_tutorials_EXPORTED_TARGETS}
+)
+
+
+add_executable(gate_client src/gate_client.cpp)
+
+target_link_libraries( 
+  gate_client
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
+add_dependencies(
+  gate_client
+  ${actionlib_tutorials_EXPORTED_TARGETS}
+)
+
+
+
+
+
+
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/actionlib_tutorials.cpp
+#   src/${PROJECT_NAME}/task_3.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -144,12 +172,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- #add_executable(${PROJECT_NAME}_node src/actionlib_tutorials_node.cpp)
-add_executable(gate_server src/gate_server.cpp)
+# add_executable(${PROJECT_NAME}_node src/task_3_node.cpp)
 
-add_executable(gate_client src/gate_client.cpp)
-
-#add_executable(fibonacci_callback_client src/fibonacci_callback_client.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -161,37 +185,10 @@ add_executable(gate_client src/gate_client.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(gate_server
-   ${catkin_LIBRARIES}
- )
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
 
-target_link_libraries( 
-  gate_client
-  ${catkin_LIBRARIES}
-)
-
-
-#target_link_libraries( 
- # fibonacci_callback_client
- # ${catkin_LIBRARIES}
-#)
-
-
-
-add_dependencies(
-  gate_server
-  ${actionlib_tutorials_EXPORTED_TARGETS}
-)
-
-add_dependencies(
-  gate_client
-  ${actionlib_tutorials_EXPORTED_TARGETS}
-)
-
-#add_dependencies(
- # fibonacci_callback_client
-  #${actionlib_tutorials_EXPORTED_TARGETS}
-#)
 #############
 ## Install ##
 #############
@@ -232,7 +229,7 @@ add_dependencies(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_actionlib_tutorials.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_task_3.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
