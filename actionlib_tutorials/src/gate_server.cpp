@@ -32,7 +32,7 @@
       ros::Rate r(1);
        bool success = true;
 
-   
+    feedback_.flag.clear();
       
        {
          
@@ -42,26 +42,58 @@
           
           as_.setPreempted();
            success = false;
-           
+           return;
          }
          
-	feedback_.x_cordinate=goal->x_cordinate;
-	feedback_.y_cordinate=goal->y_cordinate;
+	
+	if (goal->x_center>goal->x_cordinate)
+	 {      
+          feedback_.flag.push_back("Go Right");
+          result_.name = "Go Right" ;
+  	  }
+        
+        else {
+              feedback_.flag.push_back("Go Left");
+              result_.name = "Go Left" ;
+              }
+    
 
-	ROS_INFO("go toward %f ,%f", feedback_.x_cordinate,feedback_.y_cordinate);
+      
+
+          
+          if (goal->y_center>goal->y_cordinate )
+           {
+            feedback_.flag.push_back("Go up");
+            result_.name = "Go up" ;
+            }
+          else {
+            feedback_.flag.push_back("Go down");
+            result_.name = "Go down" ;
+           }
+}
+
+	
+
+	ROS_INFO("go toward %f ,%f", goal->x_cordinate,goal->y_cordinate);
          
          as_.publishFeedback(feedback_);
          
-         r.sleep();
+         //r.sleep();
+	
+         
+         // set the action state to succeeded
+         as_.setSucceeded(result_);
+       
        }
    
+      // if(success)
        
 	   
 	     
-     }
+     };
    
    
-   };
+   
    
    
    int main(int argc, char** argv)
